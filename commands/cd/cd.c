@@ -45,31 +45,30 @@ int main(int argc, char** argv) {
   int cluster;
   char *temp = global_path->cwd;
 
-  if (argv[1] == NULL){
+  if (argv[1] == NULL){ // Test for no arguments
     memcpy(global_path->cwd, "/", sizeof("/"));
     global_path->cluster = 0;
-  } else if (strcmp(argv[1], "/") == 0) {
+  } else if (strcmp(argv[1], "/") == 0) { // Test for root directory
     memcpy(global_path->cwd, "/", sizeof("/"));
     global_path->cluster = 0;
-  } else if (argv[1][0] == '/'){
-    cluster = 0;
-    directories = parseInput(argv[1], "/");
+  } else if (argv[1][0] == '/'){ // Test for absolute path
+    cluster = 0; // start at root cluster
+    directories = parseInput(argv[1], "/"); // gets an array of all directories
     directoryCount = countDirectories(directories);
-    for ( i = 0; i < directoryCount; i++){
+    for ( i = 0; i < directoryCount; i++){ // tests each directory sequentially
       printf("Directory:%s\n", directories[i]);
       printf("Cluster:%d\n", cluster);
       cluster = checkDirectory(addSpaces(directories[i]), cluster);
       printf("%d\n", cluster);
-      if (cluster == -1){
-        printf("directory or file does not exist\n");
-      }
     }
-    if (cluster != -1){
-      printf("%s\n", "Test");
-      global_path->cluster = cluster;
-      memcpy(global_path->cwd, generatePath(directories, directoryCount), 4096);
+    char *new_path = generatePath(directories, directoryCount);
+    if (cluster != -1){ // Check to see if commands succeeded
+      global_path->cluster = cluster; // Reset clusetr to new cluster
+      memcpy(global_path->cwd, new_path, 4096); // Set global path to new path
       printf("%s\n", "Test");
       printf("Cluster:%d\n", cluster);
+    } else {
+      printf("%s: directory or file does not exist\n", new_path);
     }
   } else if (strcmp(argv[1], ".") == 0){
     //do nothing
@@ -80,14 +79,10 @@ int main(int argc, char** argv) {
     directories = parseInput(argv[1], "/");
     directoryCount = countDirectories(directories);
     for ( i = 0; i < directoryCount; i++){
-      printf("Directory:%s\n", directories[i]);
-      printf("Cluster:%d\n", cluster);
       cluster = checkDirectory(addSpaces(directories[i]), cluster);
       printf("%d\n", cluster);
-      if (cluster == -1){
-        printf("directory or file does not exist\n");
-      }
     }
+    char *new_path = generatePath(directories, directoryCount);
     if (cluster != -1){
       printf("%s\n", "Test");
       global_path->cluster = cluster;
@@ -97,6 +92,8 @@ int main(int argc, char** argv) {
       memcpy(global_path->cwd, temp, sizeof(temp));
       printf("%s\n", "Test");
       printf("Cluster:%d\n", cluster);
+    } else {
+      printf("%s/%s:directory or file does not exist\n", global_path->cwd, argv[1]);
     }
   }
 
@@ -126,12 +123,13 @@ char * addSpaces(char* directory){
 }
 
 char * generatePath(char** directories, int directoryCount){
-  char *path;
+  static char path[] = "";
   int i;
   for (i = 0; i < directoryCount; i++){
     strcat(path, "/");
     strcat(path, directories[i]);
   }
+  printf("Path: %s\n", path);
   return path;
 }
 
