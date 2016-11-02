@@ -21,10 +21,6 @@ FILE* FILE_SYSTEM_ID;
 int BYTES_PER_SECTOR;
 struct PATH *global_path;
 
-int executeCommand();
-char ** parseInput(char line[]);
-char * readInput();
-
 int main(int argc, char** argv)
 {
     int status = 1;
@@ -34,7 +30,7 @@ int main(int argc, char** argv)
     char *line;
     char** args;
     char *buff;
-    char path[] = "./package/floppy1";
+    char path[] = FLOPPY;
 
     // SHARED MEMORY
 
@@ -65,13 +61,13 @@ int main(int argc, char** argv)
        exit(1);
     }
 
-    memcpy(global_path->cwd, "/", 1);
+    memcpy(global_path->cwd, "/", sizeof("/"));
     global_path->cluster = 0;
 
     // start the shell - prompt, read, parse, execute
     do{
         // 1. Prompt for input
-        printf("> ");
+        printf("%s> ", global_path->cwd);
         // disable buffering if need be
         // 2. Read input
 
@@ -85,7 +81,7 @@ int main(int argc, char** argv)
         strcpy(buff, line); // copy the string to the buffer
 
         // 3. Parse input
-        args = parseInput(buff); // parse input tokenizes the string and returns an array of tokens
+        args = parseInput(buff, " "); // parse input tokenizes the string and returns an array of tokens
 
         //args[0] = ls
         //args[1] = -l
@@ -133,7 +129,7 @@ int executeCommand(char *cmd[])
       } else if (strcmp(cmd[0], "pfe") == 0){
         execv("./commands/pfe/pfe", cmd);
       } else if (strcmp(cmd[0], "pwd") == 0){
-        printf("%s\n", global_path->cwd);
+        execv("./commands/pwd/pwd", cmd);
       } else if (strcmp(cmd[0], "cd") == 0) {
         execv("./commands/cd/cd", cmd);
       } else if (strcmp(cmd[0], "ls") == 0) {
@@ -152,13 +148,13 @@ int executeCommand(char *cmd[])
 	  return 0;
 }
 
-char ** parseInput(char line[]){
+char ** parseInput(char line[], const char *delimiter){
 
    int k = 0;
    int count = 0;
    char *ptr = line;
 
-   while((ptr = strchr(ptr,' ')) != NULL)
+   while((ptr = strchr(ptr, (intptr_t) delimiter)) != NULL)
    {
        count += 2;
        ptr++;
@@ -172,7 +168,7 @@ char ** parseInput(char line[]){
    }
 
    int i = 0;
-   char* cmd = strtok(line," "); // gets the first token of the line
+   char* cmd = strtok(line, delimiter); // gets the first token of the line
 
    while (cmd != NULL) // continues to get the next token until a null value
    {

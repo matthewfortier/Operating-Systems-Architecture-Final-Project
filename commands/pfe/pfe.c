@@ -10,6 +10,7 @@
 #include <string.h>
 #include "../../package/fatSupport.h"
 #include "../../commands/pbs/pbs.h"
+#include "../../shell.h"
 
 // 13 is NOT the correct number -- you fix it!
 #define BYTES_IN_SECTOR 512
@@ -57,7 +58,7 @@ int checkRange(int x, int y){
 
 int main(int argc, char *argv[]) {
   unsigned char* sect;
-  char path[] = "./package/floppy1";
+  char path[] = FLOPPY;
   int inRange = 0;
   int i;
   int bytes;

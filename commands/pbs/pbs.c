@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../package/fatSupport.h"
+#include "../../shell.h"
 #include "pbs.h"
 
 // 13 is NOT the correct number -- you fix it!
@@ -51,7 +52,7 @@ void readBootSector(){
   int cx;
   int i = 0;
   int count = 0;
-  char path[] = "./package/floppy1";
+  char path[] = FLOPPY;
   char label[11];
   char type[8];
 
