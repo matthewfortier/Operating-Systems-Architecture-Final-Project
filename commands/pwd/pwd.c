@@ -1,7 +1,8 @@
 /*
- * File:   cd.c
- * Author: Matthew Fortier and Anthony Taylor
+ * File:   pwd.c
+ * Author: Matthew Fortier
  * Assignment: Final Project Shell
+ * Description: Prints the current working directory
  */
 
  #include <stdio.h>
@@ -17,27 +18,30 @@
  #include "../../package/fatSupport.h"
  #include "../../shell.h"
 
- struct PATH *global_path;
+struct PATH *global_path;
 
-int main(int argc, char** argv) {
-  // SHARED MEMORY
-  int shmid;
-  key_t key = KEY;
-  size_t shmsize = sizeof(struct PATH);
+int main(int argc, char** argv)
+{
+        // SHARED MEMORY
+        int shmid;
+        key_t key = KEY;
+        size_t shmsize = sizeof(struct PATH);
 
-  shmid = shmget(key, shmsize, 0666);
-  if(shmid < 0){
-    perror("shmget");
-    exit(1);
-  }
-  global_path = shmat(shmid, (void *) 0, 0);
-  if(global_path == (void *) -1){
-    perror("shmat");
-    exit(1);
-  }
+        shmid = shmget(key, shmsize, 0666);
+        if(shmid < 0)
+        {
+                perror("shmget");
+                exit(1);
+        }
+        global_path = shmat(shmid, (void *) 0, 0);
+        if(global_path == (void *) -1)
+        {
+                perror("shmat");
+                exit(1);
+        }
 
-  printf("%s\n", global_path->cwd);
-  printf("%d\n", global_path->cluster);
+        // Prints the global variable
+        printf("%s\n", global_path->cwd);
 
-  return 0;
+        return 0;
 }

@@ -6,7 +6,7 @@ char ** parseInput(char line[], const char *delimiter);
 char * readInput();
 
 #define KEY 9670;
-#define FLOPPY "./package/floppy1";
+#define FLOPPY "./package/floppy3";
 
 struct PATH{
   int cluster;

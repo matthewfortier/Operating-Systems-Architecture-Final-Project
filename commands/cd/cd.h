@@ -1,3 +1,10 @@
+/*
+ * File:   cd.h
+ * Author: Matthew Fortier and Anthony Taylor
+ * Assignment: Final Project Shell
+ * Description: Header file for cd.c, holds all of the function definitions
+ */
+
 #ifndef CD_HEADER
 #define CD_HEADER
 
