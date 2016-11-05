@@ -29,148 +29,148 @@ extern void printBootSector();
 
 void readBootSector()
 {
-        unsigned char* boot;      // example buffer
+   unsigned char* boot;           // example buffer
 
-        int mostSignificantBits;
-        int leastSignificantBits;
-        int temp_bits1;
-        int temp_bits2;
-        int temp;
-        int cx;
-        int i = 0;
-        int count = 0;
-        char path[] = FLOPPY;
-        char label[11];
-        char type[8];
+   int mostSignificantBits;
+   int leastSignificantBits;
+   int temp_bits1;
+   int temp_bits2;
+   int temp;
+   int cx;
+   int i = 0;
+   int count = 0;
+   char path[] = FLOPPY;
+   char label[11];
+   char type[8];
 
-        FILE_SYSTEM_ID = fopen(path, "r+"); // Using global variable for path
+   FILE_SYSTEM_ID = fopen(path, "r+");      // Using global variable for path
 
-        if (FILE_SYSTEM_ID == NULL)
-        {
-                printf("Could not open the floppy drive or image.\n");
-                exit(1);
-        }
+   if (FILE_SYSTEM_ID == NULL)
+   {
+      printf("Could not open the floppy drive or image.\n");
+      exit(1);
+   }
 
-        // Set it to this only to read the boot sector
-        BYTES_PER_SECTOR = BYTES_TO_READ_IN_BOOT_SECTOR;
+      // Set it to this only to read the boot sector
+   BYTES_PER_SECTOR = BYTES_TO_READ_IN_BOOT_SECTOR;
 
-        // Then reset it per the value in the boot sector
+   // Then reset it per the value in the boot sector
 
-        boot = (unsigned char*) malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
+   boot = (unsigned char*) malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
 
-        if (read_sector(0, boot) == -1)
-                printf("Something has gone wrong -- could not read the boot sector\n");
+   if (read_sector(0, boot) == -1)
+      printf("Something has gone wrong -- could not read the boot sector\n");
 
 
-        // Bytes per sector
-        mostSignificantBits  = ( ( (int) boot[12] ) << 8 ) & 0x0000ff00;
-        leastSignificantBits =   ( (int) boot[11] )        & 0x000000ff;
-        temp = mostSignificantBits | leastSignificantBits;
+      // Bytes per sector
+   mostSignificantBits  = ( ( (int) boot[12] ) << 8 ) & 0x0000ff00;
+   leastSignificantBits =   ( (int) boot[11] )        & 0x000000ff;
+   temp = mostSignificantBits | leastSignificantBits;
 
-        pbs.bytes_per_sector = temp;
+   pbs.bytes_per_sector = temp;
 
-        // Sectors per cluster
-        pbs.sectors_per_cluster = (int) boot[13];
+      // Sectors per cluster
+   pbs.sectors_per_cluster = (int) boot[13];
 
-        // Number of reserved sectors
-        mostSignificantBits  = ( ( (int) boot[15] ) << 8 ) & 0x0000ff00;
-        leastSignificantBits =   ( (int) boot[14] )        & 0x000000ff;
-        temp = mostSignificantBits | leastSignificantBits;
+      // Number of reserved sectors
+   mostSignificantBits  = ( ( (int) boot[15] ) << 8 ) & 0x0000ff00;
+   leastSignificantBits =   ( (int) boot[14] )        & 0x000000ff;
+   temp = mostSignificantBits | leastSignificantBits;
 
-        pbs.nurs = temp;
+   pbs.nurs = temp;
 
-        // Sectors per cluster
-        pbs.nof = (int) boot[16];
+      // Sectors per cluster
+   pbs.nof = (int) boot[16];
 
-        // Maximum number of root directory entries
-        mostSignificantBits  = ( ( (int) boot[18] ) << 8 ) & 0x0000ff00;
-        leastSignificantBits =   ( (int) boot[17] )        & 0x000000ff;
-        temp = mostSignificantBits | leastSignificantBits;
+      // Maximum number of root directory entries
+   mostSignificantBits  = ( ( (int) boot[18] ) << 8 ) & 0x0000ff00;
+   leastSignificantBits =   ( (int) boot[17] )        & 0x000000ff;
+   temp = mostSignificantBits | leastSignificantBits;
 
-        pbs.nore = temp;
+   pbs.nore = temp;
 
-        // Total sector count
-        mostSignificantBits  = ( ( (int) boot[20] ) << 8 ) & 0x0000ff00;
-        leastSignificantBits =   ( (int) boot[19] )        & 0x000000ff;
-        temp = mostSignificantBits | leastSignificantBits;
+      // Total sector count
+   mostSignificantBits  = ( ( (int) boot[20] ) << 8 ) & 0x0000ff00;
+   leastSignificantBits =   ( (int) boot[19] )        & 0x000000ff;
+   temp = mostSignificantBits | leastSignificantBits;
 
-        pbs.total_sector_count = temp;
+   pbs.total_sector_count = temp;
 
-        // Sectors per FAT
-        mostSignificantBits  = ( ( (int) boot[23] ) << 8 ) & 0x0000ff00;
-        leastSignificantBits =   ( (int) boot[22] )        & 0x000000ff;
-        temp = mostSignificantBits | leastSignificantBits;
+      // Sectors per FAT
+   mostSignificantBits  = ( ( (int) boot[23] ) << 8 ) & 0x0000ff00;
+   leastSignificantBits =   ( (int) boot[22] )        & 0x000000ff;
+   temp = mostSignificantBits | leastSignificantBits;
 
-        pbs.spf = temp;
+   pbs.spf = temp;
 
-        // Sectors per track
-        mostSignificantBits  = ( ( (int) boot[25] ) << 8 ) & 0x0000ff00;
-        leastSignificantBits =   ( (int) boot[24] )        & 0x000000ff;
-        temp = mostSignificantBits | leastSignificantBits;
+      // Sectors per track
+   mostSignificantBits  = ( ( (int) boot[25] ) << 8 ) & 0x0000ff00;
+   leastSignificantBits =   ( (int) boot[24] )        & 0x000000ff;
+   temp = mostSignificantBits | leastSignificantBits;
 
-        pbs.spt = temp;
+   pbs.spt = temp;
 
-        // Number of heads
-        mostSignificantBits  = ( ( (int) boot[27] ) << 8 ) & 0x0000ff00;
-        leastSignificantBits =   ( (int) boot[26] )        & 0x000000ff;
-        temp = mostSignificantBits | leastSignificantBits;
+      // Number of heads
+   mostSignificantBits  = ( ( (int) boot[27] ) << 8 ) & 0x0000ff00;
+   leastSignificantBits =   ( (int) boot[26] )        & 0x000000ff;
+   temp = mostSignificantBits | leastSignificantBits;
 
-        pbs.noh = temp;
+   pbs.noh = temp;
 
-        // Boot signature
-        cx = snprintf(pbs.bs, 6, "0x%0x", boot[38]);
+      // Boot signature
+   cx = snprintf(pbs.bs, 6, "0x%0x", boot[38]);
 
-        // Volume ID
-        mostSignificantBits  = ( ( (int) boot[42] ) << 24 ) & 0xff000000;
-        leastSignificantBits = ( ( (int) boot[41] ) << 16 ) & 0x00ff0000;
-        temp_bits2 = ( ( (int) boot[40] ) << 8 ) & 0x0000ff00;
-        temp_bits1 = ( (int) boot[39] ) & 0x000000ff;
-        temp = mostSignificantBits | leastSignificantBits | temp_bits2 | temp_bits1;
+      // Volume ID
+   mostSignificantBits  = ( ( (int) boot[42] ) << 24 ) & 0xff000000;
+   leastSignificantBits = ( ( (int) boot[41] ) << 16 ) & 0x00ff0000;
+   temp_bits2 = ( ( (int) boot[40] ) << 8 ) & 0x0000ff00;
+   temp_bits1 = ( (int) boot[39] ) & 0x000000ff;
+   temp = mostSignificantBits | leastSignificantBits | temp_bits2 | temp_bits1;
 
-        cx = snprintf(pbs.vol_id, 16, "0x%0x", temp);
+   cx = snprintf(pbs.vol_id, 16, "0x%0x", temp);
 
-        // Volume Label
-        for(i = 43; i < 54; i++)
-        {
-                label[count] = (char) boot[i];
-                count++;
-        }
-        label[10] = '\0';
-        strcpy(pbs.vol_label, label);
+      // Volume Label
+   for(i = 43; i < 54; i++)
+   {
+      label[count] = (char) boot[i];
+      count++;
+   }
+   label[10] = '\0';
+   strcpy(pbs.vol_label, label);
 
-        count = 0;
+   count = 0;
 
-        // File System Type
-        for(i = 54; i < 62; i++)
-        {
-                type[count] = (char) boot[i];
-                count++;
-        }
-        type[7] = '\0';
-        strcpy(pbs.fst, type);
+      // File System Type
+   for(i = 54; i < 62; i++)
+   {
+      type[count] = (char) boot[i];
+      count++;
+   }
+   type[7] = '\0';
+   strcpy(pbs.fst, type);
 }
 
 void printBootSector()
 {
-        printf("Bytes per sector%15s %d\n", "=", pbs.bytes_per_sector);
-        printf("Sectors per cluster%12s %d\n", "=", pbs.sectors_per_cluster);
-        printf("Number of FATs%17s %d\n", "=", pbs.nof);
-        printf("Number of reserved sectors%5s %d\n", "=", pbs.nurs);
-        printf("Number of root entries%9s %d\n", "=", pbs.nore);
-        printf("Total sector count%13s %d\n", "=", pbs.total_sector_count);
-        printf("Sectors per FAT%16s %d\n", "=",pbs.spf);
-        printf("Sectors per track%14s %d\n", "=",pbs.spt);
-        printf("Number of heads%16s %d\n", "=",pbs.noh);
-        printf("Boot signature (in hex)%8s %s\n", "=",pbs.bs);
-        printf("Volume ID (in hex)%13s %s\n", "=",pbs.vol_id);
-        printf("Volume label%19s %s\n", "=",pbs.vol_label);
-        printf("File system type%15s %s\n", "=",pbs.fst);
-        printf("\n");
+   printf("Bytes per sector%15s %d\n", "=", pbs.bytes_per_sector);
+   printf("Sectors per cluster%12s %d\n", "=", pbs.sectors_per_cluster);
+   printf("Number of FATs%17s %d\n", "=", pbs.nof);
+   printf("Number of reserved sectors%5s %d\n", "=", pbs.nurs);
+   printf("Number of root entries%9s %d\n", "=", pbs.nore);
+   printf("Total sector count%13s %d\n", "=", pbs.total_sector_count);
+   printf("Sectors per FAT%16s %d\n", "=",pbs.spf);
+   printf("Sectors per track%14s %d\n", "=",pbs.spt);
+   printf("Number of heads%16s %d\n", "=",pbs.noh);
+   printf("Boot signature (in hex)%8s %s\n", "=",pbs.bs);
+   printf("Volume ID (in hex)%13s %s\n", "=",pbs.vol_id);
+   printf("Volume label%19s %s\n", "=",pbs.vol_label);
+   printf("File system type%15s %s\n", "=",pbs.fst);
+   printf("\n");
 }
 
 int main()
 {
-        readBootSector();
-        printBootSector();
-        return 0;
+   readBootSector();
+   printBootSector();
+   return 0;
 }

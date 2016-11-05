@@ -22,26 +22,26 @@ struct PATH *global_path;
 
 int main(int argc, char** argv)
 {
-        // SHARED MEMORY
-        int shmid;
-        key_t key = KEY;
-        size_t shmsize = sizeof(struct PATH);
+      // SHARED MEMORY
+   int shmid;
+   key_t key = KEY;
+   size_t shmsize = sizeof(struct PATH);
 
-        shmid = shmget(key, shmsize, 0666);
-        if(shmid < 0)
-        {
-                perror("shmget");
-                exit(1);
-        }
-        global_path = shmat(shmid, (void *) 0, 0);
-        if(global_path == (void *) -1)
-        {
-                perror("shmat");
-                exit(1);
-        }
+   shmid = shmget(key, shmsize, 0666);
+   if(shmid < 0)
+   {
+      perror("shmget");
+      exit(1);
+   }
+   global_path = shmat(shmid, (void *) 0, 0);
+   if(global_path == (void *) -1)
+   {
+      perror("shmat");
+      exit(1);
+   }
 
-        // Prints the global variable
-        printf("%s\n", global_path->cwd);
+      // Prints the global variable
+   printf("%s\n", global_path->cwd);
 
-        return 0;
+   return 0;
 }
