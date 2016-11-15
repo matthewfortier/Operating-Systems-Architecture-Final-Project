@@ -151,6 +151,10 @@ int executeCommand(char *cmd[])
       {
          execv("./commands/ls/ls", cmd);
       }
+      else if (strcmp(cmd[0], "rm") == 0)
+      {
+         execv("./commands/rm/rm", cmd);
+      }
       else {
          printf("%s does not exist\n", cmd[0]);
       }

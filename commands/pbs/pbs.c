@@ -148,6 +148,9 @@ void readBootSector()
    }
    type[7] = '\0';
    strcpy(pbs.fst, type);
+
+   fclose(FILE_SYSTEM_ID);
+   free(sect);
 }
 
 void printBootSector()
@@ -158,13 +161,13 @@ void printBootSector()
    printf("Number of reserved sectors%5s %d\n", "=", pbs.nurs);
    printf("Number of root entries%9s %d\n", "=", pbs.nore);
    printf("Total sector count%13s %d\n", "=", pbs.total_sector_count);
-   printf("Sectors per FAT%16s %d\n", "=",pbs.spf);
-   printf("Sectors per track%14s %d\n", "=",pbs.spt);
-   printf("Number of heads%16s %d\n", "=",pbs.noh);
-   printf("Boot signature (in hex)%8s %s\n", "=",pbs.bs);
-   printf("Volume ID (in hex)%13s %s\n", "=",pbs.vol_id);
-   printf("Volume label%19s %s\n", "=",pbs.vol_label);
-   printf("File system type%15s %s\n", "=",pbs.fst);
+   printf("Sectors per FAT%16s %d\n", "=", pbs.spf);
+   printf("Sectors per track%14s %d\n", "=", pbs.spt);
+   printf("Number of heads%16s %d\n", "=", pbs.noh);
+   printf("Boot signature (in hex)%8s %s\n", "=", pbs.bs);
+   printf("Volume ID (in hex)%13s %s\n", "=", pbs.vol_id);
+   printf("Volume label%19s %s\n", "=", pbs.vol_label);
+   printf("File system type%15s %s\n", "=", pbs.fst);
    printf("\n");
 }
 

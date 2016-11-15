@@ -31,6 +31,8 @@ extern unsigned int  get_fat_entry(int fat_entry_number, char* fat);
 extern void set_fat_entry(int fat_entry_number, int value, char* fat);
 
 void read_cluster(int marker, unsigned char* sect);
+char *trimwhitespace(char *str);
+char * addSpaces(char* directory);
 
 struct PATH *global_path;
 
@@ -77,7 +79,7 @@ int main(int argc, char *argv[])
       bytes = read_sector(global_path->cluster + 19, sect);
    }
    else {
-      bytes = read_sector(global_path->cluster + 32, sect);
+      bytes = read_sector(global_path->cluster + 31, sect);
    }
 
       // Prints out all header info
@@ -87,6 +89,9 @@ int main(int argc, char *argv[])
       read_cluster(i, sect);
    }
 
+   fclose(FILE_SYSTEM_ID);
+   free(sect);
+
    return 0;
 }
 
@@ -95,7 +100,12 @@ void read_cluster(int marker, unsigned char* sect)
    int i;
    char filename[9];
    char extension[4];
+   char *fullName;
+   char *stringTemp;
+   char attributeArray[0];
    int attributes;
+   int print = 0;
+   int file = 0;
    int FLC;
    int size;
    char type[5];
@@ -111,11 +121,14 @@ void read_cluster(int marker, unsigned char* sect)
       filename[i - marker] = sect[i];
    }
 
-      // If the first byte is 0x00, then there are no more entries
-   if (filename[0] != 0x00)
-   {
-      filename[7] = '\0';           // Make sure to add null terminating character
+   filename[7] = '\0';           // Make sure to add null terminating character
 
+   if ((int) sect[marker + 11] != 16 && (int) sect[marker + 11] != 32)
+      return;
+
+      // If the first byte is 0x00, then there are no more entries
+   if (filename[0] != 0x00 && filename[0] != 0xFFFFFFE5)
+   {
          // Get the file extension for this entry
       for (i = marker + 8; i < marker + 11; i++)
       {
@@ -124,6 +137,17 @@ void read_cluster(int marker, unsigned char* sect)
 
       extension[3] = '\0';           // Make sure to add null terminating character
       attributes = sect[marker + 11];           // Set the attributes for this entry
+      temp = attributes;
+
+      while (temp)
+      {
+         if (temp == 0x0F || temp == 0x40 || temp == 0x80)
+         {
+            print = 1;
+            break;
+         }
+         temp >>= 1;
+      }
 
          // Get the FLC
       mostSignificantBits  = ( ( (int) sect[marker + 27] ) << 8 ) & 0x0000ff00;
@@ -134,7 +158,6 @@ void read_cluster(int marker, unsigned char* sect)
 
       // Get File Size (in bytes)
 
-         // Volume ID
       mostSignificantBits  = ( ( (int) sect[marker + 31] ) << 24 ) & 0xff000000;
       leastSignificantBits = ( ( (int) sect[marker + 30] ) << 16 ) & 0x00ff0000;
       temp_bits2 = ( ( (int) sect[marker + 29] ) << 8 ) & 0x0000ff00;
@@ -144,18 +167,64 @@ void read_cluster(int marker, unsigned char* sect)
       size = temp;
 
          // Print out ls information ignoring anything that is not a file or directory
-      if (attributes != 0x0F && attributes != 0x08)
+      if (print == 0)
       {
          if (attributes == 0x10)
          {
+            strcpy(stringTemp, trimwhitespace(filename)); // Strip all whitespace for printing
+            strcat(stringTemp, trimwhitespace(extension));
+            fullName = addSpaces(stringTemp);
             strcpy(type, "Dir");
-            printf("%s %s %10s %13d %9d\n", filename, extension, type, size, FLC);
+            printf("%s %11s %13d %9d\n", fullName, type, size, FLC);
          }
          else {
+            strcpy(stringTemp, trimwhitespace(filename)); // Strip all whitespace for printing
+            if(strlen(trimwhitespace(extension)) > 0)
+            {
+               strcat(stringTemp, ".");
+            }
+            strcat(stringTemp, trimwhitespace(extension));
+            fullName = addSpaces(stringTemp);
             strcpy(type, "File");
-            printf("%s.%s %10s %13d %9d\n", filename, extension, type, size, FLC);
+            printf("%s %11s %13d %9d\n", fullName, type, size, FLC);
          }
       }
 
    }
+}
+
+//http://stackoverflow.com/questions/122616/how-do-i-trim-leading-trailing-whitespace-in-a-standard-way
+char *trimwhitespace(char *str)
+{
+   char *end;
+
+      // Trim leading space
+   while(isspace((unsigned char)*str))
+      str++;
+
+   if(*str == 0) // All spaces?
+      return str;
+
+      // Trim trailing space
+   end = str + strlen(str) - 1;
+   while(end > str && isspace((unsigned char)*end))
+      end--;
+
+      // Write new null terminator
+   *(end+1) = 0;
+
+   return str;
+}
+
+char * addSpaces(char* directory)
+{
+   static char filename[11];
+   memset(filename, 32, 10);
+   int i;
+   for (i = 0; i < strlen(directory); i++)
+   {
+      filename[i] = directory[i];
+   }
+   filename[11] = '\0';
+   return filename;
 }

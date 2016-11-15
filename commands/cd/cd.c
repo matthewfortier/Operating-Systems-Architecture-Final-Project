@@ -44,6 +44,7 @@ int main(int argc, char** argv)
    }
 
    char** directories;
+   char** tempDirectories;
    int directoryCount;
    int i;
    int cluster;
@@ -66,30 +67,17 @@ int main(int argc, char** argv)
       directoryCount = countDirectories(directories);
       for ( i = 0; i < directoryCount; i++)             // tests each directory sequentially
       {
-         printf("Directory:%s\n", directories[i]);
-         printf("Cluster:%d\n", cluster);
          cluster = checkDirectory(addSpaces(directories[i]), cluster);
-         printf("%d\n", cluster);
       }
       char *new_path = generatePath(directories, directoryCount);
       if (cluster != -1)            // Check to see if commands succeeded
       {
          global_path->cluster = cluster;                // Reset clusetr to new cluster
          memcpy(global_path->cwd, new_path, 4096);                // Set global path to new path
-         printf("%s\n", "Test");
-         printf("Cluster:%d\n", cluster);
       }
       else {
          printf("%s: directory or file does not exist\n", new_path);
       }
-   }
-   else if (strcmp(argv[1], ".") == 0)
-   {
-      //do nothing
-   }
-   else if (strcmp(argv[1], "..") == 0)
-   {
-      // go back a directory until root
    }
    else {
       cluster = global_path->cluster;
@@ -98,24 +86,47 @@ int main(int argc, char** argv)
       for ( i = 0; i < directoryCount; i++)
       {
          cluster = checkDirectory(addSpaces(directories[i]), cluster);
-         printf("%d\n", cluster);
       }
       char *new_path = generatePath(directories, directoryCount);
       if (cluster != -1)
       {
-         printf("%s\n", "Test");
          global_path->cluster = cluster;
+         printf("%d\n", global_path->cluster);
          if (strcmp(temp, "/") != 0)                  // Adds "/" in the correct spaces to look like path name
          {
             strcat(temp, "/");
          }
-         strcat(temp, argv[1]);
-         memcpy(global_path->cwd, temp, sizeof(temp));
-         printf("%s\n", "Test");
-         printf("Cluster:%d\n", cluster);
+         else if (strcmp(argv[1], "..") == 0)
+         {
+            directories = parseInput(global_path->cwd, "/");
+            directoryCount = countDirectories(directories);
+            if (directoryCount == 1)
+            {
+               memcpy(global_path->cwd, "/", sizeof("/"));
+            }
+            else
+            {
+               for (i = 0; i < directoryCount; i++)
+               {
+                  tempDirectories[i] = directories[i];
+                  printf("%s\n", directories[i]);
+               }
+               new_path = generatePath(tempDirectories, directoryCount-1);
+               memcpy(global_path->cwd, new_path, sizeof(new_path));
+            }
+         }
+         else if (strcmp(argv[1], ".") == 0)
+         {
+            // Do nothing
+         }
+         else
+         {
+            strcat(temp, argv[1]);
+            memcpy(global_path->cwd, temp, sizeof(temp));
+         }
       }
       else {
-         printf("%s/%s:directory or file does not exist\n", global_path->cwd, argv[1]);
+         printf("Directory does not exist or is a file\n");
       }
    }
 
@@ -138,7 +149,7 @@ int countDirectories(char** directories)
 char * addSpaces(char* directory)
 {
    static char filename[8];
-   memset(filename, ' ', 7);
+   memset(filename, 32, 7);
    int i;
    for (i = 0; i < strlen(directory); i++)
    {
@@ -157,7 +168,6 @@ char * generatePath(char** directories, int directoryCount)
       strcat(path, "/");
       strcat(path, directories[i]);
    }
-   printf("Path: %s\n", path);
    return path;
 }
 
@@ -183,18 +193,25 @@ int checkDirectory(char *directory, int cluster)
       bytes = read_sector(cluster + 19, sect);          // Reads in correct sector depending on if cluster is pointing to root
    }
    else {
-      bytes = read_sector(cluster + 32, sect);
+      bytes = read_sector(cluster + 31, sect);
    }
 
    for (i = 0; i < BYTES_PER_SECTOR; i += 32)       // Loops through 32 byte entires and reads the cluster
    {
       FLC = read_cluster(i, sect, directory);           // Returns the First Logical Cluster for the directory given
-      printf("%d\n", FLC);
-      if (FLC != -1)            // Returns -1 if directory does not exists and returns it
+      if (FLC >= 0)            // Returns -1 if directory does not exists and returns it
       {
          return FLC;
       }
+      else if (FLC == -2)
+      {
+         break;
+      }
    }
+
+   fclose(FILE_SYSTEM_ID);
+   free(sect);
+
    return -1;
 }
 
@@ -203,6 +220,8 @@ int read_cluster(int marker, unsigned char* sect, char* directory)
    int i;
    char filename[9];
    char extension[4];
+   char *fullName;
+   char *tempString;
    int attributes;
    int FLC;
    int size;
@@ -222,7 +241,6 @@ int read_cluster(int marker, unsigned char* sect, char* directory)
 // If the first byte is 0x00, then there are no more entries
    if (filename[0] == 0x00)
    {
-      printf("%s\n", "Directory is empty");
       return -1;
    }
 
@@ -235,6 +253,13 @@ int read_cluster(int marker, unsigned char* sect, char* directory)
    }
 
    extension[3] = '\0';     // Make sure to add null terminating character
+
+   tempString = trimwhitespace(filename);
+   strcpy(fullName, tempString);
+   tempString = trimwhitespace(extension);
+   strcat(fullName, tempString);
+   directory = trimwhitespace(directory);
+
    attributes = sect[marker + 11];      // Set the attributes for this entry
 
 // Get the FLC
@@ -243,14 +268,16 @@ int read_cluster(int marker, unsigned char* sect, char* directory)
    temp = mostSignificantBits | leastSignificantBits;
 
    FLC = temp;
-
-   printf("%s%s|\n", filename, directory);
-   if (strcmp(filename, directory) == 0)
+   if (strcmp(fullName, directory) == 0)
    {
-      return FLC;
-   }
-   else {
-      printf("%s\n", "Not the same");
+      if(attributes != 0x10)
+      {
+         return -2;
+      }
+      else
+      {
+         return FLC;
+      }
    }
 /* Unnessecary for this function but may be useful
 
@@ -313,4 +340,27 @@ char ** parseInput(char line[], const char *delimiter)
    }
 
    return temp;
+}
+
+//http://stackoverflow.com/questions/122616/how-do-i-trim-leading-trailing-whitespace-in-a-standard-way
+char *trimwhitespace(char *str)
+{
+   char *end;
+
+      // Trim leading space
+   while(isspace((unsigned char)*str))
+      str++;
+
+   if(*str == 0) // All spaces?
+      return str;
+
+      // Trim trailing space
+   end = str + strlen(str) - 1;
+   while(end > str && isspace((unsigned char)*end))
+      end--;
+
+      // Write new null terminator
+   *(end+1) = 0;
+
+   return str;
 }
