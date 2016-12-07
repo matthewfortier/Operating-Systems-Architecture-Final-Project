@@ -15,5 +15,9 @@ char * addSpaces(char* directory);
 char * generatePath(char** directories, int directoryCount);
 int read_cluster(int marker, unsigned char* sect, char* directory);
 char *trimwhitespace(char *str);
+int removeEntry(char *directory, int cluster);
+int parseFilename(char* input);
+int searchForFile(char* buffer, int cluster);
+
 
 #endif

@@ -1,0 +1,77 @@
+commit f3b3abdea4645e9651e161e412435e8e4a947076
+Author: Matthew Fortier <Matthew Fortier>
+Date:   Tue Dec 6 23:24:23 2016 -0500
+
+    Added Latex documents
+
+commit 5be78353903669ec3b185e03365183f3acb33a91
+Author: Matthew Fortier <Matthew Fortier>
+Date:   Tue Dec 6 23:05:34 2016 -0500
+
+    Incremental update
+
+commit b44cda2e0ad52017bb56f169699c6c9b5c90e1af
+Author: Matthew Fortier <Matthew Fortier>
+Date:   Tue Dec 6 20:18:52 2016 -0500
+
+    Another readme update
+
+commit c8bc117389291d53b540cef462f658239f59d0b3
+Author: Matthew Fortier <Matthew Fortier>
+Date:   Tue Dec 6 19:51:53 2016 -0500
+
+    Update to the readme
+
+commit 78aedeee37214adb59ad219e3505ad1311ae1cef
+Author: Matthew Fortier <Matthew Fortier>
+Date:   Tue Dec 6 19:46:51 2016 -0500
+
+    Huge commint lots of progress, checks the diffs
+
+commit a88c7b3a472e10029f782fe9fe6790f741a1d16e
+Author: Matthew Fortier <Matthew Fortier>
+Date:   Tue Nov 15 18:03:32 2016 -0500
+
+    Incremental
+
+commit 631e432c86d380e223274e6b267cb13a2b95b0e8
+Author: Matthew Fortier <Matthew Fortier>
+Date:   Sat Nov 5 19:22:51 2016 -0400
+
+    Formatting update
+
+commit 21753d5bac520bb8ddd838aecb7f6c530a97f269
+Author: Matthew Fortier <Matthew Fortier>
+Date:   Wed Nov 2 22:33:11 2016 -0400
+
+    Formating and Header update
+
+commit bbb2b9c840fb977fb0596f211941d194260e5294
+Author: Matthew Fortier <Matthew Fortier>
+Date:   Wed Nov 2 15:50:13 2016 -0400
+
+    cd update
+
+commit b24fca88269873df2a91773fe69435bb7b4ac832
+Author: Matthew Fortier <Matthew Fortier>
+Date:   Wed Nov 2 01:36:46 2016 -0400
+
+    Incremental update, major edits to call commands
+
+commit 9714c159f4c189612618e3013a205960ba180f8e
+Author: Matthew Fortier <Matthew Fortier>
+Date:   Mon Oct 31 21:11:11 2016 -0400
+
+    Removed pwd.c
+
+commit b28211222c98234778a219a78d59ca398b30b94d
+Author: Matthew Fortier <Matthew Fortier>
+Date:   Mon Oct 31 21:03:42 2016 -0400
+
+    Initial Upload
+
+commit 6b09cccc23cbea08ec71c92b8ef33b6fc73f3c41
+Author: Matthew Fortier <csi3850106@hawk.champlain.edu>
+Date:   Mon Oct 31 13:05:16 2016 -0400
+
+    first commit
