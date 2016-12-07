@@ -148,9 +148,6 @@ void readBootSector()
    }
    type[7] = '\0';
    strcpy(pbs.fst, type);
-
-   fclose(FILE_SYSTEM_ID);
-   free(sect);
 }
 
 void printBootSector()
@@ -168,7 +165,6 @@ void printBootSector()
    printf("Volume ID (in hex)%13s %s\n", "=", pbs.vol_id);
    printf("Volume label%19s %s\n", "=", pbs.vol_label);
    printf("File system type%15s %s\n", "=", pbs.fst);
-   printf("\n");
 }
 
 int main()

@@ -24,6 +24,7 @@ char *file_info[2]; // To hold the filename and extension
 
 #define BYTES_IN_SECTOR 512
 #define BYTES_PER_ENTRY 32
+#define MAX_SECTORS 2847
 
 int parseFilename(char* input);
 int searchForFile(char* buffer);
@@ -287,14 +288,24 @@ void createFile(char* entry)
             // Set file attributes
             entry[11] = 0x20;
 
-            entry[26] = sector & 255;
-            entry[27] = (sector >> 8) & 255;
+            int k;
+            for (k = sector; k < MAX_SECTORS; k++)
+            {
+              fat = get_fat_entry(k, fat_buffer);
+              if (fat == 0x00)
+                break;
+            }
+
+            entry[26] = k & 255;
+            entry[27] = (k >> 8) & 255;
 
             // Write entry to sector
             for (j = 0; j < BYTES_PER_ENTRY; j++)
             {
                sect[j + i] = entry[j];
             }
+
+            set_fat_entry(k, 0xFFF, fat_buffer);
 
             // Write the sector
 
@@ -305,6 +316,13 @@ void createFile(char* entry)
             else
             {
                write_sector(sector + 31, sect);
+            }
+
+            // Write the fat buffer back
+
+            for (i = 1; i <= 9; i++)
+            {
+              write_sector(i, fat_buffer - (BYTES_PER_SECTOR * (9-i)) );
             }
 
             success = 1;

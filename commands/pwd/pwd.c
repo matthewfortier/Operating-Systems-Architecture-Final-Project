@@ -41,7 +41,7 @@ int main(int argc, char** argv)
    }
 
       // Prints the global variable
-   printf("%s\n", global_path->cwd);
+   printf("Path: %s\n", global_path->cwd);
 
    return 0;
 }

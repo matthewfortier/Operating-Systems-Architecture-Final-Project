@@ -31,12 +31,6 @@ int main(int argc, char** argv)
 {
    char *buffer;
    int found;
-   // Check arguments
-   if (argc != 1)
-   {
-      printf("Invalid number of arguments: df \n");
-      return 1;
-   }
 
 // SHARED MEMORY
    int shmid;
