@@ -54,7 +54,7 @@ int main(int argc, char** argv)
    // You must set two global variables for the disk access functions:
    //      FILE_SYSTEM_ID         BYTES_PER_SECTOR
 
-      // Use this for an image of a floppy drive
+   // Use this for an image of a floppy drive
    FILE_SYSTEM_ID = fopen(path, "r+");
 
    if (FILE_SYSTEM_ID == NULL)
@@ -66,9 +66,9 @@ int main(int argc, char** argv)
    memcpy(global_path->cwd, "/", sizeof("/"));
    global_path->cluster = 0;
 
-      // start the shell - prompt, read, parse, execute
+   // start the shell - prompt, read, parse, execute
    do {
-         // 1. Prompt for input
+      // 1. Prompt for input
       printf("%s> ", global_path->cwd);
       // disable buffering if need be
       // 2. Read input
@@ -82,29 +82,38 @@ int main(int argc, char** argv)
 
       strcpy(buff, line);   // copy the string to the buffer
 
-         // 3. Parse input
+      // 3. Parse input
       args = parseInput(buff, " ");   // parse input tokenizes the string and returns an array of tokens
-
       //args[0] = ls
       //args[1] = -l
       //args[2] = null
+
+      if(countDirectories(args) > 1)
+      {
+        int i;
+        for(i = 1; i < countDirectories(args); i++)
+        {
+          upper_string(args[i]);
+        }
+      }
 
       // 4. Execute
 
       if (strcmp(line, "help") == 0)   // if the input is "help" display the help info
       {
-         printf("Copyright © Matthew Fortier and Joseph Healy\n");
-         printf("Assignment: Create your own shell\n");
+         printf("Copyright © Matthew Fortier and Anthony Taylor\n");
+         printf("Assignment: Semester Project\n");
          printf("Description: The program emulates a Bash shell with limited capability\n");
-         printf("Features added: cd works correctly, hostname, and cwd to the input line");
-
-         printf("\n\ncd <directory> - changes the working directory\n");
-         printf("exit - closes the program\n\n");
+         printf("exit - closes the program\n");
          status = 0;    // set the status to 0 so it continues to repeat
       }
       else if (strcmp(line, "exit") == 0)       // if th input equal "exit" change status to end loop to end program
       {
          status = 1;
+      }
+      else if (strcmp(line, "clear") == 0)
+      {
+         system("clear");
       }
       else {
          status = executeCommand(args);    // if the input equals a simple command, execute that command
@@ -130,7 +139,7 @@ int executeCommand(char *cmd[])
    }
    else if (x == 0)
    {
-         // This is run by child
+      // This is run by child
       if(strcmp(cmd[0], "pbs") == 0)
       {
          execv("./commands/pbs/pbs", cmd);
@@ -155,13 +164,33 @@ int executeCommand(char *cmd[])
       {
          execv("./commands/rm/rm", cmd);
       }
+      else if (strcmp(cmd[0], "rmdir") == 0)
+      {
+         execv("./commands/rmdir/rmdir", cmd);
+      }
+      else if (strcmp(cmd[0], "mkdir") == 0)
+      {
+         execv("./commands/mkdir/mkdir", cmd);
+      }
+      else if (strcmp(cmd[0], "touch") == 0)
+      {
+         execv("./commands/touch/touch", cmd);
+      }
+      else if (strcmp(cmd[0], "cat") == 0)
+      {
+         execv("./commands/cat/cat", cmd);
+      }
+      else if (strcmp(cmd[0], "df") == 0)
+      {
+         execv("./commands/df/df", cmd);
+      }
       else {
          printf("%s does not exist\n", cmd[0]);
       }
       exit(1);
    }
    else{
-         // this is run by parent
+      // this is run by parent
       do {
          y = waitpid(x, &status, WUNTRACED); //WUNTRACED, is an option for waitPID, it waits for child to terminate
       } while (!WIFEXITED(status) && !WIFSIGNALED(status)); // WIFEXITED, and WIFSIGNALED are activated when process terminates
@@ -183,7 +212,7 @@ char ** parseInput(char line[], const char *delimiter)
       ptr++;
    }
 
-      // creates an array with the number of arguments in the commands
+   // creates an array with the number of arguments in the commands
    char** temp = malloc(count * sizeof(char*));
    if(temp == NULL)
    {
@@ -243,4 +272,28 @@ char* readInput()
          returnVal = realloc(returnVal, stringsize);    //resize string
       }
    }
+}
+
+void upper_string(char s[]) {
+   int c = 0;
+
+   while (s[c] != '\0') {
+      if (s[c] >= 'a' && s[c] <= 'z') {
+         s[c] = s[c] - 32;
+      }
+      c++;
+   }
+}
+
+int countDirectories(char** directories)
+{
+   int i = 0;
+   int count = 0;
+
+   while(directories[i] != NULL)
+   {
+      count++;
+      i++;
+   }
+   return count;
 }

@@ -70,6 +70,7 @@ int main(int argc, char** argv)
          cluster = checkDirectory(addSpaces(directories[i]), cluster);
       }
       char *new_path = generatePath(directories, directoryCount);
+      printf("%s\n", new_path);
       if (cluster != -1)            // Check to see if commands succeeded
       {
          global_path->cluster = cluster;                // Reset clusetr to new cluster
@@ -88,32 +89,24 @@ int main(int argc, char** argv)
          cluster = checkDirectory(addSpaces(directories[i]), cluster);
       }
       char *new_path = generatePath(directories, directoryCount);
+      char *current_path = global_path->cwd;
       if (cluster != -1)
       {
          global_path->cluster = cluster;
-         printf("%d\n", global_path->cluster);
-         if (strcmp(temp, "/") != 0)                  // Adds "/" in the correct spaces to look like path name
+
+         if (strcmp(argv[1], "..") == 0)
          {
-            strcat(temp, "/");
-         }
-         else if (strcmp(argv[1], "..") == 0)
-         {
-            directories = parseInput(global_path->cwd, "/");
-            directoryCount = countDirectories(directories);
-            if (directoryCount == 1)
-            {
-               memcpy(global_path->cwd, "/", sizeof("/"));
-            }
+            const char ch = '/';
+            char* ret;
+
+            ret = strrchr(current_path, ch);
+
+            if(global_path->cluster != 0)
+              *ret = '\0';
             else
-            {
-               for (i = 0; i < directoryCount; i++)
-               {
-                  tempDirectories[i] = directories[i];
-                  printf("%s\n", directories[i]);
-               }
-               new_path = generatePath(tempDirectories, directoryCount-1);
-               memcpy(global_path->cwd, new_path, sizeof(new_path));
-            }
+              memcpy(global_path->cwd, "/", 4096);
+
+            memcpy(global_path->cwd, current_path, 4096);
          }
          else if (strcmp(argv[1], ".") == 0)
          {
@@ -121,8 +114,10 @@ int main(int argc, char** argv)
          }
          else
          {
-            strcat(temp, argv[1]);
-            memcpy(global_path->cwd, temp, sizeof(temp));
+            if (strcmp(global_path->cwd, "/") != 0)
+              strcat(current_path, "/");
+            strcat(current_path, argv[1]);
+            memcpy(global_path->cwd, current_path, sizeof(current_path));
          }
       }
       else {
@@ -159,14 +154,21 @@ char * addSpaces(char* directory)
    return filename;
 }
 
-char * generatePath(char** directories, int directoryCount)
+char * generatePath(char** directs, int directoryCount)
 {
    static char path[] = "";
    int i;
+   if (directoryCount == 1)
+   {
+     strcat(path, "/");
+     strcat(path, directs[0]);
+     return path;
+   }
    for (i = 0; i < directoryCount; i++)
    {
-      strcat(path, "/");
-      strcat(path, directories[i]);
+      if(global_path->cluster != 0)
+        strcat(path, "/");
+      strcat(path, directs[i]);
    }
    return path;
 }
@@ -306,40 +308,37 @@ int read_cluster(int marker, unsigned char* sect, char* directory)
 
 char ** parseInput(char line[], const char *delimiter)
 {
+      char* path = strdup(line);
+      char ** res  = NULL;
+      char *  p    = strtok (path, delimiter);
+      int n_spaces = 0, i;
 
-   int k = 0;
-   int count = 0;
-   char *ptr = line;
 
-   while((ptr = strchr(ptr, (intptr_t) delimiter)) != NULL)
-   {
-      count += 2;
-      ptr++;
-   }
+      /* split string and append tokens to 'res' */
 
-// creates an array with the number of arguments in the commands
-   char** temp = malloc(count * sizeof(char*));
-   if(temp == NULL)
-   {
-      perror("parseInput memory allocation error");
-   }
+      while (p) {
+        res = realloc (res, sizeof (char*) * ++n_spaces);
 
-   int i = 0;
-   char* cmd = strtok(line, delimiter);     // gets the first token of the line
+        if (res == NULL)
+          exit (-1); /* memory allocation failed */
 
-   while (cmd != NULL)      // continues to get the next token until a null value
-   {
-      i++;
-      temp[i-1] = cmd;          // assigns each valid argument to the array
-      cmd = strtok(NULL, " ");          // gets the next token
+        p[strlen(p)] = '\0';
+        res[n_spaces-1] = p;
 
-      if(cmd == NULL)
-      {
-         temp[i] = NULL;
+        p = strtok (NULL, delimiter);
       }
-   }
 
-   return temp;
+      /* realloc one extra element for the last NULL */
+
+      res = realloc (res, sizeof (char*) * (n_spaces+1));
+      res[n_spaces] = 0;
+
+      /* print the result */
+
+      // for (i = 0; i < (n_spaces+1); ++i)
+      //   printf ("res[%d] = %s\n", i, res[i]);
+
+      return res;
 }
 
 //http://stackoverflow.com/questions/122616/how-do-i-trim-leading-trailing-whitespace-in-a-standard-way
@@ -363,4 +362,15 @@ char *trimwhitespace(char *str)
    *(end+1) = 0;
 
    return str;
+}
+
+char ** removeLastElement(char ** directories)
+{
+  int i = 0;
+  char** temp = malloc(sizeof(char*) * (countDirectories(directories) - 1));
+  for (i = 0; i < (countDirectories(directories) - 1); i++)
+  {
+    temp[i] = directories[i];
+  }
+  return temp;
 }
